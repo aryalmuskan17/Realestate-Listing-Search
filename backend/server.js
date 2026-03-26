@@ -26,8 +26,13 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5001;
 app.use("/", listingRoutes);
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 5001;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
