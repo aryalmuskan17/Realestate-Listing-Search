@@ -13,9 +13,21 @@ const getListings = async (req, res) => {
     };
 
     const isAdmin = req.query.is_admin === "true";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-    const listings = await listingService.getListings(filters, isAdmin);
-    res.json(listings);
+    const listings = await listingService.getListings(
+      filters,
+      isAdmin,
+      page,
+      limit
+    );
+
+    res.json({
+      page,
+      limit,
+      results: listings,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch listings" });

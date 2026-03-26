@@ -1,6 +1,6 @@
 const pool = require("../db/db");
 
-const getListings = async (filters, isAdmin) => {
+const getListings = async (filters, isAdmin, page = 1, limit = 10) => {
   const selectFields = isAdmin
     ? "id, title, description, price, beds, baths, suburb, property_type, address, internal_status_notes, agent_id, created_at"
     : "id, title, description, price, beds, baths, suburb, property_type, address, agent_id, created_at";
@@ -51,7 +51,10 @@ const getListings = async (filters, isAdmin) => {
     count++;
   }
 
-  query += " ORDER BY id DESC";
+  const offset = (page - 1) * limit;
+
+  query += ` ORDER BY id DESC LIMIT $${count} OFFSET $${count + 1}`;
+  values.push(limit, offset);
 
   const result = await pool.query(query, values);
   return result.rows;
