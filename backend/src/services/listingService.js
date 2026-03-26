@@ -53,4 +53,9 @@ const getListings = async (filters) => {
   return result.rows;
 };
 
-module.exports = { getListings };
+const getListingById = async (id) => {
+  const result = await pool.query("SELECT * FROM properties WHERE id = $1", [id]);
+  return result.rows[0];
+};
+
+module.exports = { getListings, getListingById };

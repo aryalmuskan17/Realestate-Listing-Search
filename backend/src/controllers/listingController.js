@@ -20,4 +20,19 @@ const getListings = async (req, res) => {
   }
 };
 
-module.exports = { getListings };
+const getListingById = async (req, res) => {
+  try {
+    const listing = await listingService.getListingById(req.params.id);
+
+    if (!listing) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+
+    res.json(listing);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch listing" });
+  }
+};
+
+module.exports = { getListings, getListingById };
