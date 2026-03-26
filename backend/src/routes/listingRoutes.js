@@ -1,9 +1,8 @@
 const express = require("express");
-
 const router = express.Router();
 
-router.get("/listings", (req, res) => {
-  res.json({ message: "Listings route working" });
-});
+const listingController = require("../controllers/listingController");
+
+router.get("/listings", listingController.getListings);
 
 module.exports = router;
