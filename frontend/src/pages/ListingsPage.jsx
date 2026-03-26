@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 
 function ListingsPage() {
@@ -25,13 +26,17 @@ function ListingsPage() {
         <p>No listings found.</p>
       ) : (
         listings.map((listing) => (
-          <div
+          <Link
             key={listing.id}
+            to={`/listings/${listing.id}`}
             style={{
+              display: "block",
               border: "1px solid #ccc",
               padding: "12px",
               marginBottom: "12px",
               borderRadius: "8px",
+              textDecoration: "none",
+              color: "inherit",
             }}
           >
             <h2>{listing.title}</h2>
@@ -41,7 +46,7 @@ function ListingsPage() {
               {listing.beds} beds | {listing.baths} baths
             </p>
             <p>{listing.property_type}</p>
-          </div>
+          </Link>
         ))
       )}
     </div>
