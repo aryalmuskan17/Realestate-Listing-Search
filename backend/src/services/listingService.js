@@ -1,7 +1,11 @@
 const pool = require("../db/db");
 
-const getListings = async (filters) => {
-  let query = "SELECT * FROM properties WHERE 1=1";
+const getListings = async (filters, isAdmin) => {
+  const selectFields = isAdmin
+    ? "id, title, description, price, beds, baths, suburb, property_type, address, internal_status_notes, agent_id, created_at"
+    : "id, title, description, price, beds, baths, suburb, property_type, address, agent_id, created_at";
+
+  let query = `SELECT ${selectFields} FROM properties WHERE 1=1`;
   const values = [];
   let count = 1;
 
@@ -53,8 +57,16 @@ const getListings = async (filters) => {
   return result.rows;
 };
 
-const getListingById = async (id) => {
-  const result = await pool.query("SELECT * FROM properties WHERE id = $1", [id]);
+const getListingById = async (id, isAdmin) => {
+  const selectFields = isAdmin
+    ? "id, title, description, price, beds, baths, suburb, property_type, address, internal_status_notes, agent_id, created_at"
+    : "id, title, description, price, beds, baths, suburb, property_type, address, agent_id, created_at";
+
+  const result = await pool.query(
+    `SELECT ${selectFields} FROM properties WHERE id = $1`,
+    [id]
+  );
+
   return result.rows[0];
 };
 

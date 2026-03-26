@@ -12,7 +12,9 @@ const getListings = async (req, res) => {
       keyword: req.query.keyword,
     };
 
-    const listings = await listingService.getListings(filters);
+    const isAdmin = req.query.is_admin === "true";
+
+    const listings = await listingService.getListings(filters, isAdmin);
     res.json(listings);
   } catch (error) {
     console.error(error);
@@ -22,7 +24,8 @@ const getListings = async (req, res) => {
 
 const getListingById = async (req, res) => {
   try {
-    const listing = await listingService.getListingById(req.params.id);
+    const isAdmin = req.query.is_admin === "true";
+    const listing = await listingService.getListingById(req.params.id, isAdmin);
 
     if (!listing) {
       return res.status(404).json({ error: "Listing not found" });
