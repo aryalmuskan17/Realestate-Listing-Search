@@ -26,6 +26,14 @@ describe("Listings API", () => {
     expect(res.body).toHaveProperty("id");
     expect(res.body.id).toBe(1);
   });
+
+  it("should return 400 for invalid price_min", async () => {
+    const res = await request(app).get("/listings?price_min=abc");
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error");
+    expect(res.body.error).toBe("Invalid price_min");
+  });
 });
 
 afterAll(async () => {

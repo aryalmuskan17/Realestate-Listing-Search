@@ -5,17 +5,16 @@ import api from "../services/api";
 function ListingDetailPage() {
   const { id } = useParams();
   const location = useLocation();
-  const [listing, setListing] = useState(null);
+  const isAdmin = location.state?.isAdmin || false;
 
-  const searchParams = new URLSearchParams(location.search);
-  const isAdmin = searchParams.get("is_admin") === "true";
+  const [listing, setListing] = useState(null);
 
   useEffect(() => {
     const fetchListing = async () => {
       try {
         const response = await api.get(`/listings/${id}`, {
-          params: {
-            is_admin: isAdmin ? "true" : undefined,
+          headers: {
+            "x-user-role": isAdmin ? "admin" : "user",
           },
         });
         setListing(response.data);
@@ -33,7 +32,7 @@ function ListingDetailPage() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <Link to={isAdmin ? "/?is_admin=true" : "/"}>← Back to Listings</Link>
+      <Link to="/">← Back to Listings</Link>
 
       <h1>{listing.title}</h1>
       <p>{listing.description}</p>

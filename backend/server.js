@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./src/db/db");
+const { setUserRole } = require("./src/middleware/authMiddleware");
 const listingRoutes = require("./src/routes/listingRoutes");
 require("dotenv").config();
 
@@ -8,6 +9,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(setUserRole);
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running" });
