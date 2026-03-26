@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import api from "../services/api";
 
 function ListingDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
   const [listing, setListing] = useState(null);
+
+  const searchParams = new URLSearchParams(location.search);
+  const isAdmin = searchParams.get("is_admin") === "true";
 
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const response = await api.get(`/listings/${id}`);
+        const response = await api.get(`/listings/${id}`, {
+          params: {
+            is_admin: isAdmin ? "true" : undefined,
+          },
+        });
         setListing(response.data);
       } catch (error) {
         console.error("Failed to fetch listing detail:", error);
@@ -17,7 +25,7 @@ function ListingDetailPage() {
     };
 
     fetchListing();
-  }, [id]);
+  }, [id, isAdmin]);
 
   if (!listing) {
     return <p style={{ padding: "20px" }}>Loading listing details...</p>;
@@ -25,7 +33,7 @@ function ListingDetailPage() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <Link to="/">← Back to Listings</Link>
+      <Link to={isAdmin ? "/?is_admin=true" : "/"}>← Back to Listings</Link>
 
       <h1>{listing.title}</h1>
       <p>{listing.description}</p>
@@ -35,6 +43,10 @@ function ListingDetailPage() {
       <p><strong>Property Type:</strong> {listing.property_type}</p>
       <p><strong>Beds:</strong> {listing.beds}</p>
       <p><strong>Baths:</strong> {listing.baths}</p>
+
+      {listing.internal_status_notes && (
+        <p><strong>Internal Status Notes:</strong> {listing.internal_status_notes}</p>
+      )}
     </div>
   );
 }

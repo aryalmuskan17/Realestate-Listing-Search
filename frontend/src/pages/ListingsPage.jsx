@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import api from "../services/api";
 
 function ListingsPage() {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [listings, setListings] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [suburb, setSuburb] = useState("");
@@ -23,6 +24,7 @@ function ListingsPage() {
           price_max: priceMax || undefined,
           beds: beds || undefined,
           baths: baths || undefined,
+          is_admin: isAdmin ? "true" : undefined,
         },
       });
 
@@ -46,6 +48,16 @@ function ListingsPage() {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Property Listings</h1>
+
+    <label style={{ display: "block", marginBottom: "12px" }}>
+      <input
+        type="checkbox"
+        checked={isAdmin}
+        onChange={(e) => setIsAdmin(e.target.checked)}
+        style={{ marginRight: "8px" }}
+      />
+      Admin Mode
+    </label>
 
       <form onSubmit={handleSearch} style={{ marginBottom: "20px" }}>
         <input
@@ -115,7 +127,7 @@ function ListingsPage() {
         listings.map((listing) => (
           <Link
             key={listing.id}
-            to={`/listings/${listing.id}`}
+            to={`/listings/${listing.id}${isAdmin ? "?is_admin=true" : ""}`}
             style={{
               display: "block",
               border: "1px solid #ccc",
