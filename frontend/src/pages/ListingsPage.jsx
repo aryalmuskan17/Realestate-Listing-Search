@@ -7,6 +7,10 @@ function ListingsPage() {
   const [keyword, setKeyword] = useState("");
   const [suburb, setSuburb] = useState("");
   const [propertyType, setPropertyType] = useState("");
+  const [priceMin, setPriceMin] = useState("");
+  const [priceMax, setPriceMax] = useState("");
+  const [beds, setBeds] = useState("");
+  const [baths, setBaths] = useState("");
 
   const fetchListings = async () => {
     try {
@@ -15,10 +19,16 @@ function ListingsPage() {
           keyword: keyword || undefined,
           suburb: suburb || undefined,
           property_type: propertyType || undefined,
+          price_min: priceMin || undefined,
+          price_max: priceMax || undefined,
+          beds: beds || undefined,
+          baths: baths || undefined,
         },
       });
 
-      setListings(Array.isArray(response.data) ? response.data : response.data.results || []);
+      setListings(
+        Array.isArray(response.data) ? response.data : response.data.results || []
+      );
     } catch (error) {
       console.error("Failed to fetch listings:", error);
     }
@@ -43,7 +53,7 @@ function ListingsPage() {
           placeholder="Search keyword"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          style={{ marginRight: "10px", padding: "8px" }}
+          style={{ marginRight: "10px", marginBottom: "10px", padding: "8px" }}
         />
 
         <input
@@ -51,7 +61,7 @@ function ListingsPage() {
           placeholder="Suburb"
           value={suburb}
           onChange={(e) => setSuburb(e.target.value)}
-          style={{ marginRight: "10px", padding: "8px" }}
+          style={{ marginRight: "10px", marginBottom: "10px", padding: "8px" }}
         />
 
         <input
@@ -59,7 +69,39 @@ function ListingsPage() {
           placeholder="Property type"
           value={propertyType}
           onChange={(e) => setPropertyType(e.target.value)}
-          style={{ marginRight: "10px", padding: "8px" }}
+          style={{ marginRight: "10px", marginBottom: "10px", padding: "8px" }}
+        />
+
+        <input
+          type="number"
+          placeholder="Min price"
+          value={priceMin}
+          onChange={(e) => setPriceMin(e.target.value)}
+          style={{ marginRight: "10px", marginBottom: "10px", padding: "8px" }}
+        />
+
+        <input
+          type="number"
+          placeholder="Max price"
+          value={priceMax}
+          onChange={(e) => setPriceMax(e.target.value)}
+          style={{ marginRight: "10px", marginBottom: "10px", padding: "8px" }}
+        />
+
+        <input
+          type="number"
+          placeholder="Beds"
+          value={beds}
+          onChange={(e) => setBeds(e.target.value)}
+          style={{ marginRight: "10px", marginBottom: "10px", padding: "8px" }}
+        />
+
+        <input
+          type="number"
+          placeholder="Baths"
+          value={baths}
+          onChange={(e) => setBaths(e.target.value)}
+          style={{ marginRight: "10px", marginBottom: "10px", padding: "8px" }}
         />
 
         <button type="submit" style={{ padding: "8px 12px" }}>
