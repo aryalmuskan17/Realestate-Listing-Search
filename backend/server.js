@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./src/db/db");
+const listingRoutes = require("./src/routes/listingRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -26,7 +27,7 @@ app.get("/test-db", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
-
+app.use("/", listingRoutes);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
