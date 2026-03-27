@@ -1,42 +1,55 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import api from "../services/api";
 
 function ListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(location.state?.isAdmin || false);
   const [listings, setListings] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // 🔹 Initialize from URL
   const [keyword, setKeyword] = useState(searchParams.get("keyword") || "");
   const [suburb, setSuburb] = useState(searchParams.get("suburb") || "");
-  const [propertyType, setPropertyType] = useState(searchParams.get("property_type") || "");
+  const [propertyType, setPropertyType] = useState(
+    searchParams.get("property_type") || ""
+  );
   const [priceMin, setPriceMin] = useState(searchParams.get("price_min") || "");
   const [priceMax, setPriceMax] = useState(searchParams.get("price_max") || "");
   const [beds, setBeds] = useState(searchParams.get("beds") || "");
   const [baths, setBaths] = useState(searchParams.get("baths") || "");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
 
+  const limit = 2;
+  const totalPages = Math.ceil(total / limit);
+  const hasNextPage = page < totalPages;
+
   const fetchListings = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await api.get("/listings", {
         headers: {
           "x-user-role": isAdmin ? "admin" : "user",
         },
         params: {
-          keyword: keyword || undefined,
-          suburb: suburb || undefined,
-          property_type: propertyType || undefined,
-          price_min: priceMin || undefined,
-          price_max: priceMax || undefined,
-          beds: beds || undefined,
-          baths: baths || undefined,
-          page,
-          limit: 2,
+          keyword: searchParams.get("keyword") || undefined,
+          suburb: searchParams.get("suburb") || undefined,
+          property_type: searchParams.get("property_type") || undefined,
+          price_min: searchParams.get("price_min") || undefined,
+          price_max: searchParams.get("price_max") || undefined,
+          beds: searchParams.get("beds") || undefined,
+          baths: searchParams.get("baths") || undefined,
+          page: Number(searchParams.get("page")) || 1,
+          limit,
         },
       });
 
+      setTotal(response.data.total || 0);
       setListings(
         Array.isArray(response.data)
           ? response.data
@@ -44,63 +57,75 @@ function ListingsPage() {
       );
     } catch (error) {
       console.error("Failed to fetch listings:", error);
+      setError("Failed to fetch listings.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 🔹 Fetch when URL changes
+  useEffect(() => {
+    const currentPage = Number(searchParams.get("page")) || 1;
+    setPage(currentPage);
+  }, [searchParams]);
+
   useEffect(() => {
     fetchListings();
   }, [searchParams, isAdmin]);
 
-  // 🔹 Update URL when searching
+  useEffect(() => {
+    setKeyword(searchParams.get("keyword") || "");
+    setSuburb(searchParams.get("suburb") || "");
+    setPropertyType(searchParams.get("property_type") || "");
+    setPriceMin(searchParams.get("price_min") || "");
+    setPriceMax(searchParams.get("price_max") || "");
+    setBeds(searchParams.get("beds") || "");
+    setBaths(searchParams.get("baths") || "");
+  }, [searchParams]);
+
   const handleSearch = (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    setPage(1);
 
-  setPage(1);
+    const params = {};
 
-  const params = {};
+    if (keyword) params.keyword = keyword;
+    if (suburb) params.suburb = suburb;
+    if (propertyType) params.property_type = propertyType;
+    if (priceMin) params.price_min = priceMin;
+    if (priceMax) params.price_max = priceMax;
+    if (beds) params.beds = beds;
+    if (baths) params.baths = baths;
+    params.page = 1;
 
-  if (keyword) params.keyword = keyword;
-  if (suburb) params.suburb = suburb;
-  if (propertyType) params.property_type = propertyType;
-  if (priceMin) params.price_min = priceMin;
-  if (priceMax) params.price_max = priceMax;
-  if (beds) params.beds = beds;
-  if (baths) params.baths = baths;
+    setSearchParams(params);
+  };
 
-  params.page = 1;
-
-  setSearchParams(params);
-};
-
-  // 🔹 Pagination updates URL
   const handlePageChange = (newPage) => {
-  setPage(newPage);
+    setPage(newPage);
 
-  const params = {};
+    const params = {};
 
-  if (keyword) params.keyword = keyword;
-  if (suburb) params.suburb = suburb;
-  if (propertyType) params.property_type = propertyType;
-  if (priceMin) params.price_min = priceMin;
-  if (priceMax) params.price_max = priceMax;
-  if (beds) params.beds = beds;
-  if (baths) params.baths = baths;
+    if (keyword) params.keyword = keyword;
+    if (suburb) params.suburb = suburb;
+    if (propertyType) params.property_type = propertyType;
+    if (priceMin) params.price_min = priceMin;
+    if (priceMax) params.price_max = priceMax;
+    if (beds) params.beds = beds;
+    if (baths) params.baths = baths;
+    params.page = newPage;
 
-  params.page = newPage;
-
-  setSearchParams(params);
-};
+    setSearchParams(params);
+  };
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Property Listings</h1>
 
-      <label style={{ display: "block", marginBottom: "12px" }}>
+      <label style={{ display: "block", marginBottom: "20px" }}>
         <input
           type="checkbox"
           checked={isAdmin}
-          onChange={(e) => setIsAdmin(e.target.checked)}
+          onChange={() => setIsAdmin(!isAdmin)}
           style={{ marginRight: "8px" }}
         />
         Admin Mode
@@ -168,14 +193,26 @@ function ListingsPage() {
         </button>
       </form>
 
-      {listings.length === 0 ? (
+      <p>
+        <strong>Total results:</strong> {total}
+      </p>
+
+      {loading && <p>Loading listings...</p>}
+      {error && <p>{error}</p>}
+
+      {!loading && !error && listings.length === 0 ? (
         <p>No listings found.</p>
       ) : (
+        !loading &&
+        !error &&
         listings.map((listing) => (
           <Link
             key={listing.id}
             to={`/listings/${listing.id}`}
-            state={{ isAdmin }}
+            state={{
+              isAdmin,
+              fromSearch: searchParams.toString(),
+            }}
             style={{
               display: "block",
               border: "1px solid #ccc",
@@ -197,15 +234,24 @@ function ListingsPage() {
         ))
       )}
 
-      {/* Pagination */}
       <div style={{ marginTop: "20px" }}>
-        <button onClick={() => handlePageChange(Math.max(page - 1, 1))}>
+        <button
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
+          style={{ marginRight: "10px", padding: "8px 12px" }}
+        >
           Previous
         </button>
 
-        <span style={{ margin: "0 10px" }}>Page {page}</span>
+        <span>
+          Page {page} of {totalPages || 1}
+        </span>
 
-        <button onClick={() => handlePageChange(page + 1)}>
+        <button
+          onClick={() => handlePageChange(page + 1)}
+          disabled={!hasNextPage}
+          style={{ marginLeft: "10px", padding: "8px 12px" }}
+        >
           Next
         </button>
       </div>

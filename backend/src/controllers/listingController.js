@@ -33,7 +33,7 @@ const getListings = async (req, res) => {
 
     const isAdmin = req.user.is_admin;
 
-    const listings = await listingService.getListings(
+    const { results, total } = await listingService.getListings(
       filters,
       isAdmin,
       page,
@@ -43,7 +43,8 @@ const getListings = async (req, res) => {
     res.json({
       page,
       limit,
-      results: listings,
+      total,
+      results,
     });
   } catch (error) {
     console.error(error);
